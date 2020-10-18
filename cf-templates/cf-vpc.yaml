@@ -1,0 +1,198 @@
+# Usage:
+#   aws cloudformation --region <region> create-stack --stack-name <stack name> --template-body file://vpc-pubprisubnet.yaml
+
+# This template will:
+#   Create a VPC with:
+#       1 Public Subnets
+#       1 Private Subnets
+#   An Internet Gateway (with routes to it for Public Subnets)
+#   A NAT Gateway for outbound access (with routes from Private Subnets set to use it)
+#
+Resources:
+  PubPrivateVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: CE-ProjectVPC
+
+
+  PublicSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref PubPrivateVPC
+#      AvailabilityZone: us-east-2a
+      CidrBlock: 10.0.2.0/23
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Network
+          Value: Public
+
+  PrivateSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref PubPrivateVPC
+#      AvailabilityZone: us-east-2a
+      CidrBlock: 10.0.0.0/26
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Network
+          Value: Public
+
+  InternetGateway:
+        Type: 'AWS::EC2::InternetGateway'
+        Properties:
+          Tags:
+            - Key: Name
+              Value: !Join [_, [!Ref 'AWS::StackName']]
+            - Key: Network
+              Value: Public
+
+  GatewayToInternet:
+        Type: 'AWS::EC2::VPCGatewayAttachment'
+        Properties:
+          VpcId: !Ref PubPrivateVPC
+          InternetGatewayId: !Ref InternetGateway
+
+  PublicRouteTable:
+        Type: 'AWS::EC2::RouteTable'
+        Properties:
+          VpcId: !Ref PubPrivateVPC
+          Tags:
+            - Key: Network
+              Value: Public
+
+  PublicRoute:
+        Type: 'AWS::EC2::Route'
+        DependsOn: GatewayToInternet
+        Properties:
+          RouteTableId: !Ref PublicRouteTable
+          DestinationCidrBlock: 0.0.0.0/0
+          GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+        Type: 'AWS::EC2::SubnetRouteTableAssociation'
+        Properties:
+          SubnetId: !Ref PublicSubnet1
+          RouteTableId: !Ref PublicRouteTable
+
+  NatGateway:
+        Type: "AWS::EC2::NatGateway"
+        DependsOn: NatPublicIP
+        Properties:
+          AllocationId: !GetAtt NatPublicIP.AllocationId
+          SubnetId: !Ref PublicSubnet1
+
+  NatPublicIP:
+        Type: "AWS::EC2::EIP"
+        DependsOn: PubPrivateVPC
+        Properties:
+          Domain: vpc
+
+  PrivateRouteTable:
+        Type: 'AWS::EC2::RouteTable'
+        Properties:
+          VpcId: !Ref PubPrivateVPC
+          Tags:
+            - Key: Network
+              Value: Private
+
+  PrivateRoute:
+        Type: 'AWS::EC2::Route'
+        Properties:
+          RouteTableId: !Ref PrivateRouteTable
+          DestinationCidrBlock: 0.0.0.0/0
+          NatGatewayId: !Ref NatGateway
+
+  PrivateSubnet1RouteTableAssociation:
+        Type: 'AWS::EC2::SubnetRouteTableAssociation'
+        Properties:
+          SubnetId: !Ref PrivateSubnet1
+          RouteTableId: !Ref PrivateRouteTable
+
+###########
+# Security Groups
+###########
+
+  PublicSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+          GroupName: pubSecGrp
+          GroupDescription: Enable access to Elastic Beanstalk and Bashtion Host in Public Net
+          VpcId: !Ref PubPrivateVPC
+          SecurityGroupIngress:
+              - IpProtocol: tcp
+                FromPort: 80
+                ToPort: 80
+                CidrIp: 0.0.0.0/0
+              - IpProtocol: tcp
+                FromPort: 443
+                ToPort: 443
+                CidrIp: 0.0.0.0/0
+              - IpProtocol: tcp
+                FromPort: 22
+                ToPort: 22
+                CidrIp: 0.0.0.0/0
+          Tags:
+              - Key: Name
+                Value: Public Security Group
+
+  PrivateSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+          GroupName: privSecGrp
+          GroupDescription: Enable access to ECS Cluster and Bashtion Host in Public Net
+          VpcId: !Ref PubPrivateVPC
+          SecurityGroupIngress:
+            - IpProtocol: tcp
+              FromPort: 80
+              ToPort: 80
+              CidrIp: 0.0.0.0/0
+            - IpProtocol: tcp
+              FromPort: 443
+              ToPort: 443
+              CidrIp: 0.0.0.0/0
+            - IpProtocol: tcp
+              FromPort: 22
+              ToPort: 22
+              CidrIp: 0.0.0.0/0
+          Tags:
+              - Key: Name
+                Value: Public Security Group
+
+
+###########
+# Outputs
+###########
+
+Outputs:
+
+  VPCDefaultSecurityGroup:
+    Value: !Sub ${PubPrivateVPC.DefaultSecurityGroup}
+
+  VpcId:
+    Value: !Sub ${PublicSubnet1.VpcId}
+
+  PublicSubnetId:
+    Value: !Ref PublicSubnet1
+
+  PublicAZs:
+    Value: !GetAtt
+      - PublicSubnet1
+      - "AvailabilityZone"
+
+  PrivateSubnetId:
+    Value: !Ref PrivateSubnet1
+
+  PrivateAZs:
+    Value: !GetAtt
+      - PrivateSubnet1
+      - "AvailabilityZone"
+
+
+  PrivateSecurityGroup:
+    Value: !Ref PrivateSecurityGroup
+
+  PublicSecurityGroup:
+    Value: !Ref PublicSecurityGroup

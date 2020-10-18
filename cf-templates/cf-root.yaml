@@ -1,0 +1,102 @@
+#
+# usage:
+# aws cloudformation package --template-file cf-root.yaml --output-template cf-packaged.yaml --s3-bucket team1-cicd-pipeline-staging
+# aws cloudformation deploy --template-file ./cf-packaged.yaml --stack-name <StackName> --parameter-overrides VpcCidr='10.0.0.0/16' PublicSubnetCidr=10.0.0.0/26 PrivateSubnetCidr=10.0.2.0/23 --capabilities  CAPABILITY_NAMED_IAM
+#
+# or check in ./cf-package.yaml and the CICDPipeline will pick it up and deploy the Environment
+#
+AWSTemplateFormatVersion: 2010-09-09
+Description: This is the root template that references all other nested templates
+
+
+Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./cf-vpc.yaml
+      TimeoutInMinutes: '10'
+
+#  Beanstalk:
+#    Type: AWS::CloudFormation::Stack
+#    Properties:
+#      TemplateURL: ./cf-beanstalk.yaml
+#      TimeoutInMinutes: '10'
+
+  ECS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./cf-ecs.yaml
+      Parameters:
+        VpcId:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.VpcId
+        SubnetId:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.PrivateSubnetId
+        AZs:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.PrivateAZs
+      TimeoutInMinutes: '10'
+
+  PublicBastionHost:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./cf-bastion.yaml
+      Parameters:
+        VpcId:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.VpcId
+        SubnetId:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.PublicSubnetId
+        AZs:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.PrivateAZs
+      TimeoutInMinutes: '10'
+
+#  Beanstalk:
+#    Type: AWS::CloudFormation::Stack
+#    Properties:
+#      TemplateURL: ./cf-beanstalk.yaml
+#      Parameters:
+#        VpcId:
+#          Fn::GetAtt:
+#            - VPC
+#            - Outputs.VpcId
+#        SubnetId:
+#          Fn::GetAtt:
+#            - VPC
+#            - Outputs.PublicSubnetId
+#        AZs:
+#          Fn::GetAtt:
+#            - VPC
+#            - Outputs.PrivateAZs
+#      TimeoutInMinutes: '10'
+
+
+
+Outputs:
+  StackRef:
+    Value: !Ref VPC
+  VPCId:
+    Value: !Sub ${VPC.Outputs.VpcId}
+  PublicSubnetId:
+    Value: !Sub ${VPC.Outputs.PublicSubnetId}
+  PrivateSubnetId:
+    Value: !Sub ${VPC.Outputs.PrivateSubnetId}
+  PrivateSecurityGroup:
+    Value: !Sub ${VPC.Outputs.PrivateSecurityGroup}
+  PublicSecurityGroup:
+    Value: !Sub ${VPC.Outputs.PublicSecurityGroup}
+
+
+#  S3Bucket:
+#    Type: AWS::CloudFormation::Stack
+#    Properties:
+#s      TemplateURL: https://github.com/dskarbrevik/cloud-excellence-group-project/tree/main/cf-bucket.yaml

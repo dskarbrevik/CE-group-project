@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This is the root template that references all other nested templates
+Outputs:
+  PrivateSecurityGroup:
+    Value:
+      Fn::Sub: ${VPC.Outputs.PrivateSecurityGroup}
+  PrivateSubnetId:
+    Value:
+      Fn::Sub: ${VPC.Outputs.PrivateSubnetId}
+  PublicSecurityGroup:
+    Value:
+      Fn::Sub: ${VPC.Outputs.PublicSecurityGroup}
+  PublicSubnetId:
+    Value:
+      Fn::Sub: ${VPC.Outputs.PublicSubnetId}
+  StackRef:
+    Value:
+      Ref: VPC
+  VPCId:
+    Value:
+      Fn::Sub: ${VPC.Outputs.VpcId}
+Resources:
+  ECS:
+    Properties:
+      Parameters:
+        AZs:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.PrivateAZs
+        SubnetId:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.PrivateSubnetId
+        VpcId:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.VpcId
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/d3e0d243136c688e1d85c6a65d92efd0.template
+      TimeoutInMinutes: '10'
+    Type: AWS::CloudFormation::Stack
+  PublicBastionHost:
+    Properties:
+      Parameters:
+        AZs:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.PrivateAZs
+        SubnetId:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.PublicSubnetId
+        VpcId:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.VpcId
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/719fc7a24c5140477b307af7c4e46acb.template
+      TimeoutInMinutes: '10'
+    Type: AWS::CloudFormation::Stack
+  VPC:
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/52759c51def3981335b7044289d71b0a.template
+      TimeoutInMinutes: '10'
+    Type: AWS::CloudFormation::Stack
