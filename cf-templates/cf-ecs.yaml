@@ -32,9 +32,7 @@ Mappings:
     us-east-1:
       AMIID: ami-eca289fb
     us-east-2:
-#      AMIID: ami-446f3521
-      # Custom AMI, OS updates and HTTPD Service enabled
-      AMIID: ami-047dffc15bb991c57
+      AMIID: ami-446f3521
     us-west-1:
       AMIID: ami-9fadf8ff
     us-west-2:
@@ -115,7 +113,7 @@ Resources:
       Volumes:
       - Name: my-vol
   ECSAutoScalingGroup:
-    DependsOn: ECSCluster
+    DependsOn: ContainerInstances
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       LaunchConfigurationName: !Ref 'ContainerInstances'
@@ -130,10 +128,13 @@ Resources:
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
-        Timeout: PT15M
+        Count: 1
+        Timeout: PT10M
     UpdatePolicy:
       AutoScalingReplacingUpdate:
+        PauseTime: PT10M
         WillReplace: 'true'
+        WaitOnResourceSignals: false
   ContainerInstances:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -146,7 +147,7 @@ Resources:
           #!/bin/bash -xe
           echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
           yum install -y aws-cfn-bootstrap
-          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+          /opt/aws/bin/cfn-signal --success --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
   service:
     Type: AWS::ECS::Service
     Properties:
@@ -231,3 +232,6 @@ Outputs:
     Value: !Ref 'ECSCluster'
   taskdef:
     Value: !Ref 'taskdefinition'
+  StackName:
+    Description: 'Stack name.'
+    Value: !Sub '${AWS::StackName}'

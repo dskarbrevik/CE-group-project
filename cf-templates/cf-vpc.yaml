@@ -22,7 +22,6 @@ Resources:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref PubPrivateVPC
-#      AvailabilityZone: us-east-2a
       CidrBlock: 10.0.2.0/23
       MapPublicIpOnLaunch: true
       Tags:
@@ -33,7 +32,6 @@ Resources:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref PubPrivateVPC
-#      AvailabilityZone: us-east-2a
       CidrBlock: 10.0.0.0/26
       MapPublicIpOnLaunch: false
       Tags:
@@ -190,9 +188,12 @@ Outputs:
       - PrivateSubnet1
       - "AvailabilityZone"
 
-
   PrivateSecurityGroup:
     Value: !Ref PrivateSecurityGroup
 
   PublicSecurityGroup:
     Value: !Ref PublicSecurityGroup
+
+  StackName:
+    Description: 'Stack name.'
+    Value: !Sub '${AWS::StackName}'

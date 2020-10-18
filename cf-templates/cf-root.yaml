@@ -16,12 +16,6 @@ Resources:
       TemplateURL: ./cf-vpc.yaml
       TimeoutInMinutes: '10'
 
-#  Beanstalk:
-#    Type: AWS::CloudFormation::Stack
-#    Properties:
-#      TemplateURL: ./cf-beanstalk.yaml
-#      TimeoutInMinutes: '10'
-
   ECS:
     Type: AWS::CloudFormation::Stack
     Properties:

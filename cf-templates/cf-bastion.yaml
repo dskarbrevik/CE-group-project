@@ -26,7 +26,6 @@ Metadata:
         default: 'EC2 Parameters'
       Parameters:
       - InstanceType
-      - KeyName
       - IAMUserSSHAccess
       - SystemsManagerAccess
       - LogsRetentionInDays
@@ -72,10 +71,6 @@ Parameters:
     Description: 'Optional ARN for a policy that will be used as the permission boundary for all roles created by this template.'
     Type: String
     Default: ''
-  KeyName:
-    Description: 'Optional key pair of the ec2-user to establish a SSH connection to the SSH bastion host/instance.'
-    Type: String
-    Default: 'CE-CICD-DevKey'
   SystemsManagerAccess:
     Description: 'Enable AWS Systems Manager agent and authorization.'
     Type: String
@@ -144,7 +139,6 @@ Mappings:
       AMI: 'ami-0873b46c45c11058d'
 Conditions:
   HasPermissionsBoundary: !Not [!Equals [!Ref PermissionsBoundary, '']]
-  HasKeyName: !Not [!Equals [!Ref KeyName, '']]
   HasIAMUserSSHAccess: !Equals [!Ref IAMUserSSHAccess, 'true']
   HasSystemsManagerAccess: !Equals [!Ref SystemsManagerAccess, 'true']
   HasAlertTopic: !Not [!Equals [!Ref ParentAlertStack, '']]
@@ -158,6 +152,7 @@ Resources:
   Logs:
     Type: 'AWS::Logs::LogGroup'
     Properties:
+      LogGroupName: !Join ['-', [BastionLogGroup, !Ref 'AWS::StackName']]
       RetentionInDays: !Ref LogsRetentionInDays
   SecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -468,7 +463,6 @@ Resources:
       InstanceType: !Ref InstanceType
       SecurityGroups:
       - !Ref SecurityGroup
-      KeyName: !If [HasKeyName, !Ref KeyName, !Ref 'AWS::NoValue']
       UserData:
         'Fn::Base64': !Sub |
           #!/bin/bash -ex
@@ -515,12 +509,6 @@ Resources:
       - Name: AutoScalingGroupName
         Value: !Ref AutoScalingGroup
 Outputs:
-  TemplateID:
-    Description: 'cloudonaut.io template id.'
-    Value: 'vpc/vpc-ssh-bastion'
-  TemplateVersion:
-    Description: 'cloudonaut.io template version.'
-    Value: '__VERSION__'
   StackName:
     Description: 'Stack name.'
     Value: !Sub '${AWS::StackName}'
