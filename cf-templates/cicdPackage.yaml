@@ -35,7 +35,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/58254b7c2dbfc35f4ae5cdf082101832.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/359da5c4c119ce73e719a3320ce6195d.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   PublicBastionHost:
@@ -53,7 +53,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/37e384d7df2e8410c0ceb0c6188ce97f.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/3a7c1c954946c21d147f4fdd08bd3433.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   VPC:
