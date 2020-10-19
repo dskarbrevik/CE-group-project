@@ -28,6 +28,8 @@ Resources:
       CidrBlock: 10.0.2.0/23
       MapPublicIpOnLaunch: true
       Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName} - Public Subnet"
         - Key: Network
           Value: !Sub "${AWS::StackName} - Public in AZ1"
 
@@ -41,6 +43,8 @@ Resources:
       CidrBlock: 10.0.0.0/26
       MapPublicIpOnLaunch: false
       Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName} - Private Subnet"
         - Key: Network
           Value: !Sub "${AWS::StackName} - Private in AZ1"
 
@@ -64,6 +68,8 @@ Resources:
         Properties:
           VpcId: !Ref PubPrivateVPC
           Tags:
+            - Key: Name
+              Value: !Sub "${AWS::StackName} - Public Routing Table"
             - Key: Network
               Value: !Sub "${AWS::StackName} - Public Routing Table"
 
@@ -99,6 +105,8 @@ Resources:
         Properties:
           VpcId: !Ref PubPrivateVPC
           Tags:
+            - Key: Name
+              Value: !Sub "${AWS::StackName} - Private Routing Table"
             - Key: Network
               Value: !Sub "${AWS::StackName} - Private Routing Table"
 
