@@ -1,6 +1,8 @@
-# The CE-CICD-Pipeline depends on only one file:
+# The CE-CICD-Pipeline 
 
-##cf-templates/cicdPackage.yaml
+## The pipeline depends on only one file:
+
+### cf-templates/cicdPackage.yaml
 
 # This may be built in a number of whys, but I've used the following sequence of commands (CLI):
 
