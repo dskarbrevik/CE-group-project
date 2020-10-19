@@ -482,11 +482,12 @@ Resources:
       AvailabilityZones: !Ref AZs
       Tags:
         - Key: Name
-          Value: Bastion Host in !Ref SubnetId
+          Value: Bastion Host in ${SubnetId}
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
         Count: 1
+        WaitOnResourceSignals: false
         Timeout: PT10M
     UpdatePolicy:
       AutoScalingRollingUpdate:

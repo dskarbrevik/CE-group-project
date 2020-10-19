@@ -5,7 +5,7 @@ Parameters:
     Description: Select a VPC that allows instances access to the Internet.
   SubnetId:
     Type: List<AWS::EC2::Subnet::Id>
-    Description: Select at two subnets in your selected VPC.
+    Description: Select one or more subnets in your selected VPC.
   AZs:
     Type: List<AWS::EC2::AvailabilityZone::Name>
     Description: Select AZs
@@ -15,7 +15,7 @@ Parameters:
     Description: Number of instances to launch in your ECS cluster.
   MaxSize:
     Type: Number
-    Default: '1'
+    Default: '4'
     Description: Maximum number of instances that can be launched in your ECS cluster.
   InstanceType:
     Description: EC2 instance type
@@ -29,24 +29,38 @@ Parameters:
     ConstraintDescription: Please choose a valid instance type.
 Mappings:
   AWSRegionToAMI:
-    us-east-1:
-      AMIID: ami-eca289fb
-    us-east-2:
-      AMIID: ami-446f3521
-    us-west-1:
-      AMIID: ami-9fadf8ff
-    us-west-2:
-      AMIID: ami-7abc111a
-    eu-west-1:
-      AMIID: ami-a1491ad2
-    eu-central-1:
-      AMIID: ami-54f5303b
-    ap-northeast-1:
-      AMIID: ami-9cd57ffd
-    ap-southeast-1:
-      AMIID: ami-a900a3ca
-    ap-southeast-2:
-      AMIID: ami-5781be34
+   'eu-north-1':
+      AMI: 'ami-04acfa2afd4604b14'
+   'ap-south-1':
+      AMI: 'ami-05d6edad5808a4739'
+   'eu-west-3':
+      AMI: 'ami-05560d522ac23788b'
+   'eu-west-2':
+      AMI: 'ami-02254c861b8371869'
+   'eu-west-1':
+       AMI: 'ami-0bb01c7d2705a4800'
+   'ap-northeast-2':
+      AMI: 'ami-029df54b84ab8240f'
+   'ap-northeast-1':
+      AMI: 'ami-0763fff45988661c8'
+   'sa-east-1':
+      AMI: 'ami-0474a590e95647451'
+   'ca-central-1':
+      AMI: 'ami-092262e997a1ab27b'
+   'ap-southeast-1':
+      AMI: 'ami-0bd1daf5da8a9a903'
+   'ap-southeast-2':
+      AMI: 'ami-0a7c4f7f17d3eecbc'
+   'eu-central-1':
+      AMI: 'ami-01b521fb7540d9996'
+   'us-east-1':
+      AMI: 'ami-007cd1678c6286a05'
+   'us-east-2':
+      AMI: 'ami-06e05a843071324d1'
+   'us-west-1':
+      AMI: 'ami-00271233a1ebb9161'
+   'us-west-2':
+      AMI: 'ami-01e1d12a048e67ed2'
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -113,7 +127,6 @@ Resources:
       Volumes:
       - Name: my-vol
   ECSAutoScalingGroup:
-    DependsOn: ContainerInstances
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       LaunchConfigurationName: !Ref 'ContainerInstances'
@@ -124,11 +137,12 @@ Resources:
       AvailabilityZones: !Ref AZs
       Tags:
         - Key: Name
-          Value: AutoScaling Group for ECS
+          Value: ${AWS::StackName} - AutoScaling Group for ECS
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
-        Count: 1
+        # BUG: The ContainerInstances User-Data section that signals back to here doesn't work!
+        Count: 0
         Timeout: PT10M
     UpdatePolicy:
       AutoScalingReplacingUpdate:
@@ -138,16 +152,19 @@ Resources:
   ContainerInstances:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMIID]
+      ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMI]
       SecurityGroups: [!Ref 'EcsSecurityGroup']
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'EC2InstanceProfile'
       UserData:
-        Fn::Base64: !Sub |
+        'Fn::Base64': !Sub |
           #!/bin/bash -xe
-          echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
-          yum install -y aws-cfn-bootstrap
-          /opt/aws/bin/cfn-signal --success --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+          #echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
+          yum install -y aws-cfn-bootstrap awscli
+          #trap '/opt/aws/bin/cfn-signal -e 1 --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}' ERR
+          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --region ${AWS::Region} --resource ContainerInstances
+          /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ECSAutoScalingGroup
+          passwd=`aws ecr get-login --no-include-email --region $AWS_REGION | sed -e 's/https:.*$//' -e 's/^docker login -u AWS -p[ \t]*//'`
   service:
     Type: AWS::ECS::Service
     Properties:
