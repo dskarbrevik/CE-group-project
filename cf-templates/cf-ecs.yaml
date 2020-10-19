@@ -137,12 +137,12 @@ Resources:
       AvailabilityZones: !Ref AZs
       Tags:
         - Key: Name
-          Value: ${AWS::StackName} - AutoScaling Group for ECS
+          Value: !Sub "${AWS::StackName} - AutoScaling Group for ECS"
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
         # BUG: The ContainerInstances User-Data section that signals back to here doesn't work!
-        Count: 0
+        Count: 1
         Timeout: PT10M
     UpdatePolicy:
       AutoScalingReplacingUpdate:
