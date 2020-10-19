@@ -482,17 +482,16 @@ Resources:
       AvailabilityZones: !Ref AZs
       Tags:
         - Key: Name
-          Value: Bastion Host in ${SubnetId}
+          Value: !Sub "${AWS::StackName} - Bastion Host"
           PropagateAtLaunch: true
     CreationPolicy:
       ResourceSignal:
         Count: 1
-        WaitOnResourceSignals: false
         Timeout: PT10M
     UpdatePolicy:
       AutoScalingRollingUpdate:
         PauseTime: PT10M
-        WaitOnResourceSignals: false
+        WaitOnResourceSignals: true
         MinInstancesInService: 1
   CPUTooHighAlarm:
     Condition: HasAlertTopic

@@ -15,28 +15,34 @@ Resources:
       CidrBlock: 10.0.0.0/16
       Tags:
         - Key: Name
-          Value: CE-ProjectVPC
+          Value: !Sub "${AWS::StackName} - VPC"
 
 
   PublicSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref PubPrivateVPC
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
       CidrBlock: 10.0.2.0/23
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Network
-          Value: Public
+          Value: !Sub "${AWS::StackName} - Public in AZ1"
 
   PrivateSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref PubPrivateVPC
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
       CidrBlock: 10.0.0.0/26
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Network
-          Value: Public
+          Value: !Sub "${AWS::StackName} - Private in AZ1"
 
   InternetGateway:
         Type: 'AWS::EC2::InternetGateway'
@@ -59,7 +65,7 @@ Resources:
           VpcId: !Ref PubPrivateVPC
           Tags:
             - Key: Network
-              Value: Public
+              Value: !Sub "${AWS::StackName} - Public Routing Table"
 
   PublicRoute:
         Type: 'AWS::EC2::Route'
@@ -94,7 +100,7 @@ Resources:
           VpcId: !Ref PubPrivateVPC
           Tags:
             - Key: Network
-              Value: Private
+              Value: !Sub "${AWS::StackName} - Private Routing Table"
 
   PrivateRoute:
         Type: 'AWS::EC2::Route'
@@ -134,7 +140,7 @@ Resources:
                 CidrIp: 0.0.0.0/0
           Tags:
               - Key: Name
-                Value: Public Security Group
+                Value: !Sub "${AWS::StackName} - Public Security Group"
 
   PrivateSecurityGroup:
       Type: AWS::EC2::SecurityGroup
@@ -157,7 +163,7 @@ Resources:
               CidrIp: 0.0.0.0/0
           Tags:
               - Key: Name
-                Value: Public Security Group
+                Value: !Sub "${AWS::StackName} - Private Security Group"
 
 
 ###########

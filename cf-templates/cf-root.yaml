@@ -16,24 +16,24 @@ Resources:
       TemplateURL: ./cf-vpc.yaml
       TimeoutInMinutes: '10'
 
-  ECS:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: ./cf-ecs.yaml
-      Parameters:
-        VpcId:
-          Fn::GetAtt:
-            - VPC
-            - Outputs.VpcId
-        SubnetId:
-          Fn::GetAtt:
-            - VPC
-            - Outputs.PrivateSubnetId
-        AZs:
-          Fn::GetAtt:
-            - VPC
-            - Outputs.PrivateAZs
-      TimeoutInMinutes: '10'
+#  ECS:
+#    Type: AWS::CloudFormation::Stack
+#    Properties:
+#      TemplateURL: ./cf-ecs.yaml
+#      Parameters:
+#        VpcId:
+#          Fn::GetAtt:
+#            - VPC
+#            - Outputs.VpcId
+#        SubnetId:
+#          Fn::GetAtt:
+#            - VPC
+#            - Outputs.PrivateSubnetId
+#        AZs:
+#          Fn::GetAtt:
+#            - VPC
+#            - Outputs.PrivateAZs
+#      TimeoutInMinutes: '10'
 
   PublicBastionHost:
     Type: AWS::CloudFormation::Stack
@@ -51,7 +51,7 @@ Resources:
         AZs:
           Fn::GetAtt:
             - VPC
-            - Outputs.PrivateAZs
+            - Outputs.PublicAZs
       TimeoutInMinutes: '10'
 
 #  Beanstalk:
