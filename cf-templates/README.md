@@ -6,9 +6,9 @@ This may be built in a number of whys, but I've used the following sequence of c
 
 % cd cf-templates
 % aws cloudformation package --template-file cf-root.yaml --output-template cicdPackage.yaml --s3-bucket team1-cicd-pipeline-staging
-
-
-Check in the resulting cf-tempaltes/cicdPackage.yaml file into the main branch and it will get picked up by the AWS Pipeline 'CE-CICD-Pipeline' and deployed to the us-east-2, if successfull.
+% git add cicdPackage.yaml
+% git commit -m "Updated CICD Stack." cicdPacakge.yaml
+% git push -u origin
 
 Otherwise, you can deploy this package via the CLI as follows (note, the region is different that our Team's default and the stack name is different):
 
