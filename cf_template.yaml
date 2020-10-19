@@ -1,5 +1,3 @@
 Resources:
   HelloBucketTestTest:
     Type: AWS::S3::Bucket
-
-#test commit for JBB
