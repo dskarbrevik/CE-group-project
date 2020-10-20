@@ -8,6 +8,7 @@ import time
 from decimal import Decimal
 from datetime import date,datetime,timedelta
 import traceback
+import json
 
 class TwitterStreamListener(tweepy.StreamListener):
 
@@ -52,6 +53,7 @@ class TwitterStreamListener(tweepy.StreamListener):
             
     def extract_tweet_data_for_dynamodb(self, tweet):
         parsed_tweet = {}
+        parsed_tweet['id'] = tweet['id']
         parsed_tweet['text'] = tweet['text']
         parsed_tweet['time_tl'] = tweet['time_tl']
         if tweet.get('user',None).get('location',None):
@@ -70,6 +72,7 @@ class TwitterStreamListener(tweepy.StreamListener):
                 limited = self.check_rate_limit()
                 if not limited:
                     tweet = self.extract_tweet_data_for_dynamodb(tweet)
+                    tweet = json.loads(json.dumps(tweet), parse_float=Decimal)
                     self.raw_tweet_table.put_item(Item=tweet)
 
             self.error_count = 0
