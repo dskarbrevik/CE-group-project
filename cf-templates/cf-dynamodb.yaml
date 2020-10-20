@@ -7,29 +7,16 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
 
-#requires update
       AttributeDefinitions:
         -
-          AttributeName: "Album"
-          AttributeType: "S"
-        -
-          AttributeName: "Artist"
-          AttributeType: "S"
-        -
-          AttributeName: "Sales"
-          AttributeType: "N"
-        -
-          AttributeName: "NumberOfSongs"
+          AttributeName: "id"
           AttributeType: "N"
 
-#requires update
       KeySchema:
         -
-          AttributeName: "Album"
-          KeyType: "HASH"
-        -
-          AttributeName: "Artist"
-          KeyType: "RANGE"
+          AttributeName: "id"
+          KeyType: "N"
+
 
 
       ProvisionedThroughput:
@@ -37,85 +24,73 @@ Resources:
         WriteCapacityUnits: "5"
       TableName: "rawTweetsDatabase"
 
-      GlobalSecondaryIndexes:
-        -
-          IndexName: "myGSI"
-          KeySchema:
-            -
-              AttributeName: "Sales"
-              KeyType: "HASH"
-            -
-              AttributeName: "Artist"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Album"
-              - "NumberOfSongs"
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-        -
-          IndexName: "myGSI2"
-          KeySchema:
-            -
-              AttributeName: "NumberOfSongs"
-              KeyType: "HASH"
-            -
-              AttributeName: "Sales"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Album"
-              - "Artist"
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-      LocalSecondaryIndexes:
-        -
-          IndexName: "myLSI"
-          KeySchema:
-            -
-              AttributeName: "Album"
-              KeyType: "HASH"
-            -
-              AttributeName: "Sales"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Artist"
-              - "NumberOfSongs"
-            ProjectionType: "INCLUDE"
+#Unccessary? Commented out
+#      GlobalSecondaryIndexes:
+#        -
+#          IndexName: "myGSI"
+#          KeySchema:
+#            -
+#              AttributeName: "Sales"
+#              KeyType: "HASH"
+#            -
+#              AttributeName: "Artist"
+#              KeyType: "RANGE"
+#          Projection:
+#            NonKeyAttributes:
+#              - "Album"
+#              - "NumberOfSongs"
+#            ProjectionType: "INCLUDE"
+#          ProvisionedThroughput:
+#            ReadCapacityUnits: "5"
+#            WriteCapacityUnits: "5"
+#        -
+#          IndexName: "myGSI2"
+#          KeySchema:
+#            -
+#              AttributeName: "NumberOfSongs"
+#              KeyType: "HASH"
+#            -
+#              AttributeName: "Sales"
+#              KeyType: "RANGE"
+#          Projection:
+#            NonKeyAttributes:
+#              - "Album"
+#              - "Artist"
+#            ProjectionType: "INCLUDE"
+#          ProvisionedThroughput:
+#            ReadCapacityUnits: "5"
+#            WriteCapacityUnits: "5"
+#      LocalSecondaryIndexes:
+#        -
+#          IndexName: "myLSI"
+#          KeySchema:
+#            -
+#              AttributeName: "Album"
+#              KeyType: "HASH"
+#            -
+#              AttributeName: "Sales"
+#              KeyType: "RANGE"
+#          Projection:
+#            NonKeyAttributes:
+#              - "Artist"
+#              - "NumberOfSongs"
+#            ProjectionType: "INCLUDE"
 
 #Processed Tweets Database
   processedTweetsDatabase:
     Type: AWS::DynamoDB::Table
     Properties:
 
-#requires update
       AttributeDefinitions:
         -
-          AttributeName: "Album"
-          AttributeType: "S"
-        -
-          AttributeName: "Artist"
-          AttributeType: "S"
-        -
-          AttributeName: "Sales"
-          AttributeType: "N"
-        -
-          AttributeName: "NumberOfSongs"
+          AttributeName: "id"
           AttributeType: "N"
 
-#requires update
       KeySchema:
         -
-          AttributeName: "Album"
-          KeyType: "HASH"
-        -
-          AttributeName: "Artist"
-          KeyType: "RANGE"
+          AttributeName: "id"
+          KeyType: "N"
+
 
 
       ProvisionedThroughput:
@@ -123,53 +98,54 @@ Resources:
         WriteCapacityUnits: "5"
       TableName: "processedTweetsDatabase"
 
-      GlobalSecondaryIndexes:
-        -
-          IndexName: "myGSI"
-          KeySchema:
-            -
-              AttributeName: "Sales"
-              KeyType: "HASH"
-            -
-              AttributeName: "Artist"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Album"
-              - "NumberOfSongs"
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-        -
-          IndexName: "myGSI2"
-          KeySchema:
-            -
-              AttributeName: "NumberOfSongs"
-              KeyType: "HASH"
-            -
-              AttributeName: "Sales"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Album"
-              - "Artist"
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-      LocalSecondaryIndexes:
-        -
-          IndexName: "myLSI"
-          KeySchema:
-            -
-              AttributeName: "Album"
-              KeyType: "HASH"
-            -
-              AttributeName: "Sales"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Artist"
-              - "NumberOfSongs"
-            ProjectionType: "INCLUDE"
+#Unccessary? Commented out
+#      GlobalSecondaryIndexes:
+#        -
+#          IndexName: "myGSI"
+#          KeySchema:
+#            -
+#              AttributeName: "Sales"
+#              KeyType: "HASH"
+#            -
+#              AttributeName: "Artist"
+#              KeyType: "RANGE"
+#          Projection:
+#            NonKeyAttributes:
+#              - "Album"
+#              - "NumberOfSongs"
+#            ProjectionType: "INCLUDE"
+#          ProvisionedThroughput:
+#            ReadCapacityUnits: "5"
+#            WriteCapacityUnits: "5"
+#        -
+#          IndexName: "myGSI2"
+#          KeySchema:
+#            -
+#              AttributeName: "NumberOfSongs"
+#              KeyType: "HASH"
+#            -
+#              AttributeName: "Sales"
+#              KeyType: "RANGE"
+#          Projection:
+#            NonKeyAttributes:
+#              - "Album"
+#              - "Artist"
+#            ProjectionType: "INCLUDE"
+#          ProvisionedThroughput:
+#            ReadCapacityUnits: "5"
+#            WriteCapacityUnits: "5"
+#      LocalSecondaryIndexes:
+#        -
+#          IndexName: "myLSI"
+#          KeySchema:
+#            -
+#              AttributeName: "Album"
+#              KeyType: "HASH"
+#            -
+#              AttributeName: "Sales"
+#              KeyType: "RANGE"
+#          Projection:
+#            NonKeyAttributes:
+#              - "Artist"
+#              - "NumberOfSongs"
+#            ProjectionType: "INCLUDE"
