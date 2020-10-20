@@ -30,11 +30,11 @@ class TwitterStreamListener(tweepy.StreamListener):
             self.topic = self.sns.Topic(sns_error_topic)
 
         # Dynamo table for storing raw tweets
-        self.dynamo = boto3.resource('dynamodb', region_name=aws_region)
+        self.dynamo = boto3.resource('dynamodb', region_name=dynamo_region)
         self.raw_tweet_table = self.dynamo.Table(dynamo_table_name)
 
         # rate limiting the Twitter stream to avoid heavy spending on downstream AWS services
-        self.max_tweets_per_minute = max_tweets_per_minute
+        self.max_tweets_per_second = max_tweets_per_second
         self.curr_tweet_count = 0
         self.curr_second = datetime.now()+timedelta(seconds=2)
 
@@ -54,7 +54,7 @@ class TwitterStreamListener(tweepy.StreamListener):
         try:
             tweet = status.__dict__['_json']
             if tweet.get('lang',None)=='en':
-                tweet['text'] = tweet['text].lower()
+                tweet['text'] = tweet['text'].lower()
                 tweet['time_tl'] = time.time()+self.tweet_ttl
                 self.curr_tweet_count += 1
                 limited = self.check_rate_limit()

@@ -36,14 +36,13 @@ if __name__=='__main__':
     print(f"Starting Twitter stream to track the following terms: {terms}")
     while True:
         try:
-            stream_listener = TwitterStreamListener(max_tweets_per_minute=config['max_tweets_per_second'],
+            stream_listener = TwitterStreamListener(max_tweets_per_second=config['max_tweets_per_second'],
                                                     tweet_ttl=config['tweet_ttl'],
                                                     dynamo_table_name=config['dynamo_table_name'],
                                                     dynamo_region=config['dynamo_region'],
                                                     sns_error_topic=config['sns_error_topic_arn'])
             stream = tweepy.Stream(auth=api.auth,
-                                   listener=stream_listener,
-                                   verify=False)
+                                   listener=stream_listener)
             stream.filter(track=terms)
         except Exception as e:
             error_time = datetime.now()
