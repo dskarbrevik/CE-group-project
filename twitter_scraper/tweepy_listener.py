@@ -49,6 +49,16 @@ class TwitterStreamListener(tweepy.StreamListener):
             self.curr_second = datetime.now()+timedelta(seconds=2)
             self.curr_tweet_count = 1
             return False
+            
+    def extract_tweet_data_for_dynamodb(self, tweet):
+        parsed_tweet = {}
+        parsed_tweet['text'] = tweet['text']
+        parsed_tweet['time_tl'] = tweet['time_tl']
+        if tweet.get('user',None).get('location',None):
+            parsed_tweet['location'] = tweet['user']['location']
+        else:
+            parsed_tweet['location']='NONE'
+        return parsed_tweet
 
     def on_status(self, status):
         try:
@@ -59,6 +69,7 @@ class TwitterStreamListener(tweepy.StreamListener):
                 self.curr_tweet_count += 1
                 limited = self.check_rate_limit()
                 if not limited:
+                    tweet = self.extract_tweet_data_for_dynamodb(tweet)
                     self.raw_tweet_table.put_item(Item=tweet)
 
             self.error_count = 0
