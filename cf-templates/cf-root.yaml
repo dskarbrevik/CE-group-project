@@ -8,6 +8,13 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: This is the root template that references all other nested templates
 
+Parameters:
+  SecretsManagerKey:
+    Description: Parameter key for ECS instance to talk to Twitter
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]*'
+    MinLength: '1'
+    MaxLength: '2048'
 
 Resources:
   VPC:
@@ -74,6 +81,7 @@ Resources:
           Fn::GetAtt:
             - VPC
             - Outputs.PrivateAZs
+        SecretsManagerKey: !Ref SecretsManagerKey
       TimeoutInMinutes: '10'
 
 #  Beanstalk:

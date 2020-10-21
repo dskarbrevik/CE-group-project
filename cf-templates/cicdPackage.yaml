@@ -19,6 +19,13 @@ Outputs:
   VPCId:
     Value:
       Fn::Sub: ${VPC.Outputs.VpcId}
+Parameters:
+  SecretsManagerKey:
+    AllowedPattern: '[a-zA-Z0-9]*'
+    Description: Parameter key for ECS instance to talk to Twitter
+    MaxLength: '2048'
+    MinLength: '1'
+    Type: String
 Resources:
   DynamoDB:
     Properties:
@@ -48,6 +55,8 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.PrivateAZs
+        SecretsManagerKey:
+          Ref: SecretsManagerKey
         SubnetId:
           Fn::GetAtt:
           - VPC
@@ -56,7 +65,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/15189951a985efca3285b9b85b0e970b.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/71ab80331f964fe503c3348947f8efc7.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   PublicBastionHost:
