@@ -82,7 +82,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/b8052850ad4f3fecf237f18d279912d2.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/1c25f109ceb2ce3816d03d4de8a6d8b7.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   VPC:
