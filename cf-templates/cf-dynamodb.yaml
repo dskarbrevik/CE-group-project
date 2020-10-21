@@ -48,6 +48,7 @@ Resources:
   rawTweetsDynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
+#      TableName: raw_tweets
       AttributeDefinitions:
       - AttributeName: !Ref 'HashKeyElementName'
         AttributeType: !Ref 'HashKeyElementType'
@@ -61,6 +62,7 @@ Resources:
   processedTweetsDynamoDBTable:
     Type: AWS::DynamoDB::Table
     Properties:
+#      TableName: tweet_metrics
       AttributeDefinitions:
       - AttributeName: !Ref 'HashKeyElementName'
         AttributeType: !Ref 'HashKeyElementType'
