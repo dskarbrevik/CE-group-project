@@ -6,6 +6,15 @@ Description: 'AWS CloudFormation Sample Template DynamoDB_Table: This template d
   table. You will be billed for the AWS resources used if you create a stack from
   this template.'
 Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: Select a VPC that allows instances access to the Internet.
+  SubnetId:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: Select at two subnets in your selected VPC.
+  AZs:
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Description: Select AZs
   HashKeyElementName:
     Description: HashType PrimaryKey Name
     Type: String
