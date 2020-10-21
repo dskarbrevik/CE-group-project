@@ -56,7 +56,9 @@ Mappings:
    'us-east-1':
       AMI: 'ami-007cd1678c6286a05'
    'us-east-2':
-      AMI: 'ami-06e05a843071324d1'
+     # AMI: 'ami-06e05a843071324d1'
+     # /aws/service/ecs/optimized-ami/amazon-linux/recommended
+      AMI: 'ami-0d741c67de23c6f69'
    'us-west-1':
       AMI: 'ami-00271233a1ebb9161'
    'us-west-2':
@@ -69,14 +71,6 @@ Resources:
     Properties:
       GroupDescription: ECS Security Group
       VpcId: !Ref VpcId
-  EcsSecurityGroupALBports:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      GroupId: !Ref 'EcsSecurityGroup'
-      IpProtocol: tcp
-      FromPort: '31000'
-      ToPort: '61000'
-      SourceSecurityGroupId: !Ref 'EcsSecurityGroup'
   CloudwatchLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -139,16 +133,21 @@ Resources:
         - Key: Name
           Value: !Sub "${AWS::StackName} - AutoScaling Group for ECS"
           PropagateAtLaunch: true
-    CreationPolicy:
-      ResourceSignal:
-        # BUG: The ContainerInstances User-Data section that signals back to here doesn't work!
-        Count: 1
-        Timeout: PT10M
     UpdatePolicy:
       AutoScalingReplacingUpdate:
+        WillReplace: 'false'
+      AutoScalingRollingUpdate:
+        MaxBatchSize: '1'
+        MinInstancesInService: '1'
+        MinSuccessfulInstancesPercent: '100'
         PauseTime: PT10M
-        WillReplace: 'true'
-        WaitOnResourceSignals: false
+        SuspendProcesses:
+          - HealthCheck
+          - ReplaceUnhealthy
+          - AlarmNotification
+          - AZRebalance
+          - ScheduledActions
+        WaitOnResourceSignals: 'true'
   ContainerInstances:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -156,15 +155,29 @@ Resources:
       SecurityGroups: [!Ref 'EcsSecurityGroup']
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'EC2InstanceProfile'
-      UserData:
-        'Fn::Base64': !Sub |
-          #!/bin/bash -xe
-          #echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
-          yum install -y aws-cfn-bootstrap awscli
-          #trap '/opt/aws/bin/cfn-signal -e 1 --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}' ERR
-          /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --region ${AWS::Region} --resource ContainerInstances
-          /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --region ${AWS::Region} --resource ECSAutoScalingGroup
-          passwd=`aws ecr get-login --no-include-email --region $AWS_REGION | sed -e 's/https:.*$//' -e 's/^docker login -u AWS -p[ \t]*//'`
+      UserData: !Base64
+        Fn::Join:
+          - ''
+          - - '#!/bin/bash'
+            - "\n"
+            - echo ECS_CLUSTER=
+            - !Ref 'ECSCluster'
+            - ' >> /etc/ecs/ecs.config'
+            - "\n"
+            - yum install aws-cfn-bootstrap awscli -y
+            - "\n"
+            - '/opt/aws/bin/cfn-signal -e 0 --stack '
+            - !Ref 'AWS::StackName'
+            - ' --resource ECSAutoScalingGroup --region '
+            - !Ref 'AWS::Region'
+            - "\n"
+            - '/opt/aws/bin/cfn-init -v --stack '
+            - !Ref 'AWS::StackName'
+            - ' --resource ContainerInstances --region '
+            - !Ref 'AWS::Region'
+            - "\n"
+            - "passwd=`aws ecr get-login --no-include-email --region $AWS_REGION | sed -e 's/https:.*$//' -e 's/^docker login -u AWS -p[ \t]*//'`"
+            - "\n"
   service:
     Type: AWS::ECS::Service
     Properties:
