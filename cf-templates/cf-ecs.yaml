@@ -29,6 +29,13 @@ Parameters:
     Type: Number
     Default: '4'
     Description: Maximum number of instances that can be launched in your ECS cluster.
+  SystemsManagerAccess:
+    Description: 'Enable AWS Systems Manager agent and authorization.'
+    Type: String
+    Default: true
+    AllowedValues:
+    - true
+    - false
   InstanceType:
     Description: EC2 instance type
     Type: String
@@ -78,6 +85,7 @@ Mappings:
       AMI: 'ami-0873b46c45c11058d'
 Conditions:
   HasIAMUserSSHAccess: !Equals [!Ref IAMUserSSHAccess, 'true']
+  HasSystemsManagerAccess: !Equals [!Ref SystemsManagerAccess, 'true']
 Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -122,7 +130,7 @@ Resources:
     Properties:
       Family: !Join ['', [!Ref 'AWS::StackName', -twitter_scraper]]
       ContainerDefinitions:
-      - Name: 
+      - Name: twitter
         Cpu: '512'
         Essential: 'true'
         Image: 706057726797.dkr.ecr.us-east-2.amazonaws.com/twitter_scraper
@@ -133,8 +141,6 @@ Resources:
             awslogs-group: !Ref 'CloudwatchLogsGroup'
             awslogs-region: !Ref 'AWS::Region'
             awslogs-stream-prefix: twitter_scraper
-      Volumes:
-      - Name: my-vol
   ECSAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -378,8 +384,8 @@ Resources:
                 - '/etc/cfn/cfn-hup.conf'
                 - '/etc/cfn/hooks.d/cfn-auto-reloader.conf'
               amazon-ssm-agent:
-                enabled: true
-                ensureRunning: true
+                enabled: !If [HasSystemsManagerAccess, true, false]
+                ensureRunning: !If [HasSystemsManagerAccess, true, false]
     Properties:
       SecurityGroups: [!Ref 'EcsSecurityGroup']
       ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMI]
@@ -477,6 +483,16 @@ Resources:
             - 'sts:AssumeRole'
       Path: /
       Policies:
+      - PolicyName: ssm
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'ssmmessages:*' # SSM Agent by https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-setting-up-messageAPIs.html
+            - 'ssm:UpdateInstanceInformation' # SSM agent by https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-setting-up-messageAPIs.html
+            - 'ec2messages:*' # SSM Session Manager by https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-setting-up-messageAPIs.html
+            Resource: '*'
       - PolicyName: ecs-service
         PolicyDocument:
           Version: 2012-10-17
