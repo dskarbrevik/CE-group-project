@@ -64,7 +64,10 @@ def get_secret():
 
 if __name__=='__main__':
 
-
+    # setup credentials and terms to track
+    with open('./config.json','rb') as file:
+        config = json.loads(file)
+        
     twitter_credentials = json.loads(get_secret())
 
     consumer_key = twitter_credentials['twitter_consumer_key']
