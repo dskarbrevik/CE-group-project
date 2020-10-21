@@ -32,12 +32,15 @@ Parameters:
   InstanceType:
     Description: EC2 instance type
     Type: String
-    Default: t2.micro
-    AllowedValues: [t2.micro, t2.small, t2.medium, t2.large, m3.medium, m3.large,
-      m3.xlarge, m3.2xlarge, m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
-      c4.large, c4.xlarge, c4.2xlarge, c4.4xlarge, c4.8xlarge, c3.large, c3.xlarge,
-      c3.2xlarge, c3.4xlarge, c3.8xlarge, r3.large, r3.xlarge, r3.2xlarge, r3.4xlarge,
-      r3.8xlarge, i2.xlarge, i2.2xlarge, i2.4xlarge, i2.8xlarge]
+    Default: t3.small
+    AllowedValues: [t2.micro, t2.small, t2.medium, t2.large,
+      t3.micro, t3.small, t3.medium, t3.large,
+      m3.medium, m3.large, m3.xlarge, m3.2xlarge,
+      m4.large, m4.xlarge, m4.2xlarge, m4.4xlarge, m4.10xlarge,
+      c4.large, c4.xlarge, c4.2xlarge, c4.4xlarge, c4.8xlarge,
+      c3.large, c3.xlarge, c3.2xlarge, c3.4xlarge, c3.8xlarge,
+      r3.large, r3.xlarge, r3.2xlarge, r3.4xlarge, r3.8xlarge,
+      i2.xlarge, i2.2xlarge, i2.4xlarge, i2.8xlarge]
     ConstraintDescription: Please choose a valid instance type.
 Mappings:
   AWSRegionToAMI:
@@ -87,7 +90,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: '10.0.0.0/16'
+          CidrIp: '10.0.2.0/23'
   IAMPolicySSHAccess:
     Type: 'AWS::IAM::Policy'
     Condition: HasIAMUserSSHAccess
@@ -117,45 +120,19 @@ Resources:
   taskdefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Join ['', [!Ref 'AWS::StackName', -ecs-demo-app]]
+      Family: !Join ['', [!Ref 'AWS::StackName', -twitter_scraper]]
       ContainerDefinitions:
-      - Name: simple-app
-        Cpu: '10'
+      - Name: 
+        Cpu: '512'
         Essential: 'true'
-        Image: httpd:2.4
-        Memory: '300'
+        Image: 706057726797.dkr.ecr.us-east-2.amazonaws.com/twitter_scraper
+        Memory: '1024'
         LogConfiguration:
           LogDriver: awslogs
           Options:
             awslogs-group: !Ref 'CloudwatchLogsGroup'
             awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: ecs-demo-app
-        MountPoints:
-        - ContainerPath: /usr/local/apache2/htdocs
-          SourceVolume: my-vol
-        PortMappings:
-        - ContainerPort: 80
-      - Name: busybox
-        Cpu: 10
-        Command: ['/bin/sh -c "while true; do echo ''<html> <head> <title>Amazon ECS
-            Sample App</title> <style>body {margin-top: 40px; background-color: #333;}
-            </style> </head><body> <div style=color:white;text-align:center> <h1>Amazon
-            ECS Sample App</h1> <h2>Congratulations!</h2> <p>Your application is now
-            running on a container in Amazon ECS.</p>'' > top; /bin/date > date ;
-            echo ''</div></body></html>'' > bottom; cat top date bottom > /usr/local/apache2/htdocs/index.html
-            ; sleep 1; done"']
-        EntryPoint: [sh, -c]
-        Essential: false
-        Image: busybox
-        Memory: 200
-        LogConfiguration:
-          LogDriver: awslogs
-          Options:
-            awslogs-group: !Ref 'CloudwatchLogsGroup'
-            awslogs-region: !Ref 'AWS::Region'
-            awslogs-stream-prefix: ecs-demo-app
-        VolumesFrom:
-        - SourceContainer: simple-app
+            awslogs-stream-prefix: twitter_scraper
       Volumes:
       - Name: my-vol
   ECSAutoScalingGroup:
@@ -406,6 +383,7 @@ Resources:
     Properties:
       SecurityGroups: [!Ref 'EcsSecurityGroup']
       ImageId: !FindInMap [AWSRegionToAMI, !Ref 'AWS::Region', AMI]
+      EbsOptimized: true
       InstanceType: !Ref 'InstanceType'
       IamInstanceProfile: !Ref 'EC2InstanceProfile'
       UserData: !Base64
@@ -416,6 +394,8 @@ Resources:
             - echo ECS_CLUSTER=
             - !Ref 'ECSCluster'
             - ' >> /etc/ecs/ecs.config'
+            - "\n"
+            - yum update -y
             - "\n"
             - yum install aws-cfn-bootstrap awscli -y
             - "\n"
@@ -429,9 +409,29 @@ Resources:
             - ' --resource ContainerInstances --region '
             - !Ref 'AWS::Region'
             - "\n"
-            - "ECR_PASSWD=`aws ecr get-login --no-include-email --region $AWS_REGION | sed -e 's/https:.*$//' -e 's/^docker login -u AWS -p[ \t]*//'`"
-            - 'export ECR_PASSWD'
+            - ECR_PASSWD=$(aws ecr get-login-password --region us-east-2)
+            - "\n"
+            - echo ECR_PASSWD=${ECR_PASSWD}
+            - ' >> /etc/profile.d/ecs.sh'
+            - "\n"
+            - echo SecretsManagerKey=
+            - !Ref 'SecretsManagerKey'
+            - ' >> /etc/profile.d/ecs.sh'
+            - "\n"
+            - AWS_ACCOUNT_ID=$(curl -s http://169.254.169.254/latest/meta-data/identity-credentials/ec2/info | grep AccountId  | awk '{print $NF}' | sed -e 's/\"//g')
+            - "\n"
+            - echo AWS_ACCOUNT_ID=${AWS_ACCOUNT_ID}
+            - ' >> /etc/profile.d/ecs.sh'
+            - "\n"
+            - echo export AWS_ACCOUNT_ID ECR_PASSWD SecretsManagerKey
+            - ' >> /etc/profile.d/ecs.sh'
+            - "\n"
+            - echo $ECR_PASSWD | docker login -u AWS --password-stdin  https://${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com
+            - "\n"
+            - docker pull  ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/twitter_scraper
+            - "\n"
             - '/usr/sbin/useradd -G wheel,docker webageAdmin'
+            - "\n"
             - 'echo "webageAdmin:pa$$w0rd" | chpasswd'
             - "\n"
   service:
@@ -483,8 +483,11 @@ Resources:
           Statement:
           - Effect: Allow
             Action: ['ecs:CreateCluster', 'ecs:DeregisterContainerInstance', 'ecs:DiscoverPollEndpoint',
-              'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession',
-              'ecs:Submit*', 'logs:CreateLogStream', 'logs:PutLogEvents']
+              'ecs:Poll', 'ecs:RegisterContainerInstance', 'ecs:StartTelemetrySession', 'ecs:Submit*',
+              'logs:CreateLogStream', 'logs:PutLogEvents', 'logs:CreateLogGroup', 'logs:DescribeLogStreams',
+              'ecr:GetAuthorizationToken', 'ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer',
+              'secretsmanager:*', 'kms:DescribeKey', 'kms:ListAliases', 'kms:ListKeys',
+              'dynamodb:Put*']
             Resource: '*'
   AutoscalingRole:
     Type: AWS::IAM::Role
@@ -512,15 +515,17 @@ Resources:
       Path: /
       Roles: [!Ref 'EC2Role']
 Outputs:
-  ecsservice:
+  ecsService:
     Value: !Ref 'service'
-  ecscluster:
+  ecsCluster:
     Value: !Ref 'ECSCluster'
-  taskdef:
+  taskDefinition:
     Value: !Ref 'taskdefinition'
+  instanceType:
+    Value: !Ref 'InstanceType'
   StackName:
     Description: 'Stack name.'
     Value: !Sub '${AWS::StackName}'
-  TwitterKey:
+  SecretsManagerKey:
     Description: Key for Twitter API access
     Value: !Ref SecretsManagerKey
