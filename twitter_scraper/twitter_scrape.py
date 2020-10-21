@@ -60,12 +60,12 @@ def get_secret():
         else:
             decoded_binary_secret = base64.b64decode(get_secret_value_response['SecretBinary'])
             
-        return(decoded_binary_secret)
+        return(secret)
 
 if __name__=='__main__':
 
 
-    twitter_credentials = get_secret()
+    twitter_credentials = json.loads(get_secret())
 
     consumer_key = twitter_credentials['twitter_consumer_key']
     consumer_secret = twitter_credentials['twitter_consumer_secret']
