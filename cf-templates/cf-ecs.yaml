@@ -19,7 +19,6 @@ Parameters:
   SecretsManagerKey:
     Description: Parameter key for ECS instance to talk to Twitter
     Type: String
-    AllowedPattern: '[a-zA-Z0-9]*'
     MinLength: '1'
     MaxLength: '2048'
   DesiredCapacity:
@@ -522,3 +521,6 @@ Outputs:
   StackName:
     Description: 'Stack name.'
     Value: !Sub '${AWS::StackName}'
+  TwitterKey:
+    Description: Key for Twitter API access
+    Value: !Ref SecretsManagerKey

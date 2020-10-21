@@ -12,7 +12,6 @@ Parameters:
   SecretsManagerKey:
     Description: Parameter key for ECS instance to talk to Twitter
     Type: String
-    AllowedPattern: '[a-zA-Z0-9]*'
     MinLength: '1'
     MaxLength: '2048'
 

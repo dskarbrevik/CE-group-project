@@ -21,7 +21,6 @@ Outputs:
       Fn::Sub: ${VPC.Outputs.VpcId}
 Parameters:
   SecretsManagerKey:
-    AllowedPattern: '[a-zA-Z0-9]*'
     Description: Parameter key for ECS instance to talk to Twitter
     MaxLength: '2048'
     MinLength: '1'
@@ -65,7 +64,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/71ab80331f964fe503c3348947f8efc7.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/83aa84e88434aac0ef7568f911ae5767.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   PublicBastionHost:
