@@ -477,7 +477,7 @@ Resources:
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
-      MaxSize: '2'
+      MaxSize: '1'
       MinSize: '1'
       VPCZoneIdentifier: !Ref SubnetId
       AvailabilityZones: !Ref AZs
@@ -492,6 +492,7 @@ Resources:
     UpdatePolicy:
       AutoScalingRollingUpdate:
         PauseTime: PT10M
+        MaxBatchSize: 2
         WaitOnResourceSignals: true
         MinInstancesInService: 1
   CPUTooHighAlarm:
