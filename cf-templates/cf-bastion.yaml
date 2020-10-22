@@ -477,7 +477,7 @@ Resources:
     Type: 'AWS::AutoScaling::AutoScalingGroup'
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
-      MaxSize: '1'
+      MaxSize: '2'
       MinSize: '1'
       VPCZoneIdentifier: !Ref SubnetId
       AvailabilityZones: !Ref AZs
