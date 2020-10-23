@@ -42,27 +42,27 @@ Resources:
             - Outputs.PublicAZs
       TimeoutInMinutes: '10'
 
-#  DynamoDB:
-#    DependsOn: VPC
-#    Type: AWS::CloudFormation::Stack
-#    Properties:
-#      TemplateURL: ./cf-dynamodb.yaml
-#      Parameters:
-#        VpcId:
-#          Fn::GetAtt:
-#            - VPC
-#            - Outputs.VpcId
-#        SubnetId:
-#          Fn::GetAtt:
-#            - VPC
-#            - Outputs.PrivateSubnetId
-#        AZs:
-#          Fn::GetAtt:
-#            - VPC
-#            - Outputs.PrivateAZs
-#        HashKeyElementName: 'rawTweetsDynamoDBTable'
-#        HashKeyElementType: 'S'
-#      TimeoutInMinutes: '10'
+  DynamoDB:
+    DependsOn: VPC
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./cf-dynamodb.yaml
+      Parameters:
+        VpcId:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.VpcId
+        SubnetId:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.PrivateSubnetId
+        AZs:
+          Fn::GetAtt:
+            - VPC
+            - Outputs.PrivateAZs
+        HashKeyElementName: 'rawTweetsDynamoDBTable'
+        HashKeyElementType: 'S'
+      TimeoutInMinutes: '10'
 
   ECS:
     Type: AWS::CloudFormation::Stack

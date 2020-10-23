@@ -26,6 +26,27 @@ Parameters:
     MinLength: '1'
     Type: String
 Resources:
+  DynamoDB:
+    DependsOn: VPC
+    Properties:
+      Parameters:
+        AZs:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.PrivateAZs
+        HashKeyElementName: rawTweetsDynamoDBTable
+        HashKeyElementType: S
+        SubnetId:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.PrivateSubnetId
+        VpcId:
+          Fn::GetAtt:
+          - VPC
+          - Outputs.VpcId
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/46ab1e5181e65d0b8c87864163b97bfd.template
+      TimeoutInMinutes: '10'
+    Type: AWS::CloudFormation::Stack
   ECS:
     Properties:
       Parameters:
@@ -43,7 +64,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/32e8755c99836f86d076b47925e96ba1.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/a518509e152752398d947fe433a31753.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   PublicBastionHost:
