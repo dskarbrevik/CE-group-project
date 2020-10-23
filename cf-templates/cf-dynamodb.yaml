@@ -51,7 +51,7 @@ Resources:
       TableName: CICDraw_tweets
       AttributeDefinitions:
       - AttributeName: !Ref 'HashKeyElementName'
-        AttributeType: !Ref 'HashKeyElementType'
+        AttributeType: N
       KeySchema:
       - AttributeName: !Ref 'HashKeyElementName'
         KeyType: HASH
@@ -65,7 +65,7 @@ Resources:
       TableName: CICDtweet_metrics
       AttributeDefinitions:
       - AttributeName: !Ref 'HashKeyElementName'
-        AttributeType: !Ref 'HashKeyElementType'
+        AttributeType: S
       KeySchema:
       - AttributeName: !Ref 'HashKeyElementName'
         KeyType: HASH
