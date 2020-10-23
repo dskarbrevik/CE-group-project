@@ -76,8 +76,8 @@ Resources:
 Outputs:
   TableNameRaw:
     Value: !Ref 'rawTweetsDynamoDBTable'
-    Description: Table name of the newly created DynamoDB table
+    Description: DynamoDB table for raw tweets streaming from twitter_scraper
 
   TableNameProcessed:
     Value: !Ref 'processedTweetsDynamoDBTable'
-    Description: Table name of the newly created DynamoDB table
+    Description: DynamoDB table of tweet metrics to support Web App

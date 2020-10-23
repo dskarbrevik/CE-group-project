@@ -99,6 +99,9 @@ Resources:
           FromPort: 22
           ToPort: 22
           CidrIp: '10.0.2.0/23'
+      Tags:
+          - Key: Name
+            Value: !Sub "${AWS::StackName} - ECS SG"
   IAMPolicySSHAccess:
     Type: 'AWS::IAM::Policy'
     Condition: HasIAMUserSSHAccess
@@ -319,14 +322,12 @@ Resources:
                       # don't grant sudo rights on bastion host!
                       /usr/sbin/useradd "$SaveUserName"
                       /usr/sbin/usermod -a -G wheel,docker "$SaveUserName"
+                      id ${SaveUserName}
                     fi
                   else
                     echo "Can not import IAM user ${SaveUserName}. User name is longer than 32 characters."
                   fi
                 done
-                /usr/sbin/useradd -G wheel webageAdmin
-                echo "webageAdmin:pa$$w0rd" | chpasswd
-                /usr/sbin/usermod -a -G docker webageAdmin
               mode: '000755'
               owner: root
               group: root
@@ -337,13 +338,16 @@ Resources:
               owner: root
               group: root
           commands:
-            'a_configure_sshd_command':
+            'a_configure_sshd_commandKeyAuth':
               command: 'sed -e ''/AuthorizedKeysCommand / s/^#*/#/'' -i /etc/ssh/sshd_config; echo -e ''\nAuthorizedKeysCommand /opt/authorized_keys_command.sh'' >> /etc/ssh/sshd_config'
               test: '! grep -q ''^AuthorizedKeysCommand /opt/authorized_keys_command.sh'' /etc/ssh/sshd_config'
-            'b_configure_sshd_commanduser':
+            'b_configure_sshd_commandPasswdAuth':
+              command: 'sed -e ''/PasswordAuthentication / s/^#*/#/g'' -i /etc/ssh/sshd_config; echo -e ''\nPasswordAuthentication yes'' >> /etc/ssh/sshd_config'
+              test: '! grep ''PasswordAuthentication '' /etc/ssh/sshd_config'
+            'c_configure_sshd_commandUser':
               command: 'sed -e ''/AuthorizedKeysCommandUser / s/^#*/#/'' -i /etc/ssh/sshd_config; echo -e ''\nAuthorizedKeysCommandUser nobody'' >> /etc/ssh/sshd_config'
               test: '! grep -q ''^AuthorizedKeysCommandUser nobody'' /etc/ssh/sshd_config'
-            'c_import_users':
+            'd_import_users':
               command: './import_users.sh'
               cwd: '/opt'
           services:
@@ -352,8 +356,9 @@ Resources:
                 enabled: true
                 ensureRunning: true
                 commands:
-                - 'a_configure_sshd_command'
-                - 'b_configure_sshd_commanduser'
+                - 'a_configure_sshd_commandKeyAuth'
+                - 'b_configure_sshd_commandPasswdAuth'
+                - 'c_configure_sshd_commandUser'
         config:
           packages:
             yum:
@@ -503,7 +508,7 @@ Resources:
               'logs:CreateLogStream', 'logs:PutLogEvents', 'logs:CreateLogGroup', 'logs:DescribeLogStreams',
               'ecr:GetAuthorizationToken', 'ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer',
               'secretsmanager:*', 'kms:DescribeKey', 'kms:ListAliases', 'kms:ListKeys',
-              'dynamodb:Put*']
+              'dynamodb:Put*', 'ssm:*' ]
             Resource: '*'
   AutoscalingRole:
     Type: AWS::IAM::Role
