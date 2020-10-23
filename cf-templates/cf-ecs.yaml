@@ -342,7 +342,7 @@ Resources:
               command: 'sed -e ''/AuthorizedKeysCommand / s/^#*/#/'' -i /etc/ssh/sshd_config; echo -e ''\nAuthorizedKeysCommand /opt/authorized_keys_command.sh'' >> /etc/ssh/sshd_config'
               test: '! grep -q ''^AuthorizedKeysCommand /opt/authorized_keys_command.sh'' /etc/ssh/sshd_config'
             'b_configure_sshd_commandPasswdAuth':
-              command: 'sed -e ''/PasswordAuthentication / s/^#*/#/g'' -i /etc/ssh/sshd_config; echo -e ''\nPasswordAuthentication yes'' >> /etc/ssh/sshd_config'
+              command: 'sed -e ''s/^.*PasswordAuthentication.*$//g'' -i /etc/ssh/sshd_config; echo -e ''\nPasswordAuthentication yes'' >> /etc/ssh/sshd_config'
               test: '! grep ''PasswordAuthentication '' /etc/ssh/sshd_config'
             'c_configure_sshd_commandUser':
               command: 'sed -e ''/AuthorizedKeysCommandUser / s/^#*/#/'' -i /etc/ssh/sshd_config; echo -e ''\nAuthorizedKeysCommandUser nobody'' >> /etc/ssh/sshd_config'
@@ -440,10 +440,6 @@ Resources:
             - echo $ECR_PASSWD | docker login -u AWS --password-stdin  https://${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com
             - "\n"
             - docker pull  ${AWS_ACCOUNT_ID}.dkr.ecr.us-east-2.amazonaws.com/twitter_scraper
-            - "\n"
-            - '/usr/sbin/useradd -G wheel,docker webageAdmin'
-            - "\n"
-            - 'echo "webageAdmin:pa$$w0rd" | chpasswd'
             - "\n"
   service:
     Type: AWS::ECS::Service
