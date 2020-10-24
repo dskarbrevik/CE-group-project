@@ -9,7 +9,7 @@
 #   A NAT Gateway for outbound access (with routes from Private Subnets set to use it)
 #
 Resources:
-  PubPrivateVPC:
+  StackVPC:
     Type: 'AWS::EC2::VPC'
     Properties:
       CidrBlock: 10.0.0.0/16
@@ -21,7 +21,7 @@ Resources:
   PublicSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
-      VpcId: !Ref PubPrivateVPC
+      VpcId: !Ref StackVPC
       AvailabilityZone: !Select
         - 0
         - Fn::GetAZs: !Ref 'AWS::Region'
@@ -36,7 +36,7 @@ Resources:
   PrivateSubnet1:
     Type: 'AWS::EC2::Subnet'
     Properties:
-      VpcId: !Ref PubPrivateVPC
+      VpcId: !Ref StackVPC
       AvailabilityZone: !Select
         - 0
         - Fn::GetAZs: !Ref 'AWS::Region'
@@ -60,13 +60,13 @@ Resources:
   GatewayToInternet:
         Type: 'AWS::EC2::VPCGatewayAttachment'
         Properties:
-          VpcId: !Ref PubPrivateVPC
+          VpcId: !Ref StackVPC
           InternetGatewayId: !Ref InternetGateway
 
   PublicRouteTable:
         Type: 'AWS::EC2::RouteTable'
         Properties:
-          VpcId: !Ref PubPrivateVPC
+          VpcId: !Ref StackVPC
           Tags:
             - Key: Name
               Value: !Sub "${AWS::StackName} - Public Routing Table"
@@ -96,14 +96,14 @@ Resources:
 
   NatPublicIP:
         Type: "AWS::EC2::EIP"
-        DependsOn: PubPrivateVPC
+        DependsOn: StackVPC
         Properties:
           Domain: vpc
 
   PrivateRouteTable:
         Type: 'AWS::EC2::RouteTable'
         Properties:
-          VpcId: !Ref PubPrivateVPC
+          VpcId: !Ref StackVPC
           Tags:
             - Key: Name
               Value: !Sub "${AWS::StackName} - Private Routing Table"
@@ -132,7 +132,7 @@ Resources:
       Properties:
           GroupName: pubSecGrp
           GroupDescription: Enable access to Elastic Beanstalk and Bashtion Host in Public Net
-          VpcId: !Ref PubPrivateVPC
+          VpcId: !Ref StackVPC
           SecurityGroupIngress:
               - IpProtocol: tcp
                 FromPort: 80
@@ -155,7 +155,7 @@ Resources:
       Properties:
           GroupName: privSecGrp
           GroupDescription: Enable access to ECS Cluster and Bashtion Host in Public Net
-          VpcId: !Ref PubPrivateVPC
+          VpcId: !Ref StackVPC
           SecurityGroupIngress:
             - IpProtocol: tcp
               FromPort: 80
@@ -181,7 +181,7 @@ Resources:
 Outputs:
 
   VPCDefaultSecurityGroup:
-    Value: !Sub ${PubPrivateVPC.DefaultSecurityGroup}
+    Value: !Sub ${StackVPC.DefaultSecurityGroup}
 
   VpcId:
     Value: !Sub ${PublicSubnet1.VpcId}
@@ -207,6 +207,9 @@ Outputs:
 
   PublicSecurityGroup:
     Value: !Ref PublicSecurityGroup
+
+  IGW:
+    Value: !Ref InternetGateway
 
   StackName:
     Description: 'Stack name.'

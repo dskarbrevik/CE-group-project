@@ -14,6 +14,17 @@ Parameters:
     Type: String
     MinLength: '1'
     MaxLength: '2048'
+  OneTimeInstalls:
+    Description: On Initial installs, we install the DynamoDB tables and the Elastic Beanstalk
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+
+
+Conditions:
+  IsOneTimeInstalls: !Equals [!Ref OneTimeInstalls, 'true']
 
 Resources:
   VPC:
@@ -43,8 +54,9 @@ Resources:
       TimeoutInMinutes: '10'
 
   DynamoDB:
-    DependsOn: VPC
     Type: AWS::CloudFormation::Stack
+    Condition: IsOneTimeInstalls
+    DependsOn: VPC
     Properties:
       TemplateURL: ./cf-dynamodb.yaml
       Parameters:
@@ -60,6 +72,7 @@ Resources:
           Fn::GetAtt:
             - VPC
             - Outputs.PrivateAZs
+        OneTimeInstalls: !Ref OneTimeInstalls
         HashKeyElementName: 'rawTweetsDynamoDBTable'
         HashKeyElementType: 'S'
       TimeoutInMinutes: '10'
@@ -86,6 +99,8 @@ Resources:
 
 #  Beanstalk:
 #    Type: AWS::CloudFormation::Stack
+#    Condition: IsOneTimeInstalls
+#    DependsOn: VPC
 #    Properties:
 #      TemplateURL: ./cf-beanstalk.yaml
 #      Parameters:
@@ -101,9 +116,8 @@ Resources:
 #          Fn::GetAtt:
 #            - VPC
 #            - Outputs.PrivateAZs
+#        OneTimeInstalls: !Ref OneTimeInstalls
 #      TimeoutInMinutes: '10'
-
-
 
 Outputs:
   StackRef:

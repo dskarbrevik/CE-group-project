@@ -1,4 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
+Conditions:
+  IsOneTimeInstalls:
+    Fn::Equals:
+    - Ref: OneTimeInstalls
+    - 'true'
 Description: This is the root template that references all other nested templates
 Outputs:
   PrivateSecurityGroup:
@@ -20,6 +25,14 @@ Outputs:
     Value:
       Fn::Sub: ${VPC.Outputs.VpcId}
 Parameters:
+  OneTimeInstalls:
+    AllowedValues:
+    - true
+    - false
+    Default: false
+    Description: On Initial installs, we install the DynamoDB tables and the Elastic
+      Beanstalk
+    Type: String
   SecretsManagerKey:
     Description: Parameter key for ECS instance to talk to Twitter
     MaxLength: '2048'
@@ -27,6 +40,7 @@ Parameters:
     Type: String
 Resources:
   DynamoDB:
+    Condition: IsOneTimeInstalls
     DependsOn: VPC
     Properties:
       Parameters:
@@ -36,6 +50,8 @@ Resources:
           - Outputs.PrivateAZs
         HashKeyElementName: rawTweetsDynamoDBTable
         HashKeyElementType: S
+        OneTimeInstalls:
+          Ref: OneTimeInstalls
         SubnetId:
           Fn::GetAtt:
           - VPC
@@ -44,7 +60,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/46ab1e5181e65d0b8c87864163b97bfd.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/f1179076da2885b7affe0f8b8a012db4.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   ECS:
@@ -64,7 +80,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/a518509e152752398d947fe433a31753.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/3f70f534966e83510bc17f2875467015.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   PublicBastionHost:
@@ -88,6 +104,6 @@ Resources:
     Type: AWS::CloudFormation::Stack
   VPC:
     Properties:
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/a4e4d2c7ea8879a039ce26596761e229.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/621c0ebbf15d62d100e1cad918c3d426.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack

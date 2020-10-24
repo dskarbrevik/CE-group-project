@@ -15,6 +15,13 @@ Parameters:
   AZs:
     Type: List<AWS::EC2::AvailabilityZone::Name>
     Description: Select AZs
+  OneTimeInstalls:
+    Description: On Initial installs, we install the DynamoDB tables and the Elastic Beanstalk
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   HashKeyElementName:
     Description: HashType PrimaryKey Name
     Type: String
@@ -44,9 +51,14 @@ Parameters:
     MinValue: '5'
     MaxValue: '10000'
     ConstraintDescription: must be between 5 and 10000
+
+Conditions:
+  IsOneTimeInstalls: !Equals [!Ref OneTimeInstalls, 'true']
+
 Resources:
   rawTweetsDynamoDBTable:
     Type: AWS::DynamoDB::Table
+    Condition: IsOneTimeInstalls
     Properties:
       TableName: CICDraw_tweets
       AttributeDefinitions:
@@ -61,6 +73,7 @@ Resources:
 
   processedTweetsDynamoDBTable:
     Type: AWS::DynamoDB::Table
+    Condition: IsOneTimeInstalls
     Properties:
       TableName: CICDtweet_metrics
       AttributeDefinitions:
@@ -75,9 +88,11 @@ Resources:
 
 Outputs:
   TableNameRaw:
+    Condition: IsOneTimeInstalls
     Value: !Ref 'rawTweetsDynamoDBTable'
     Description: DynamoDB table for raw tweets streaming from twitter_scraper
 
   TableNameProcessed:
+    Condition: IsOneTimeInstalls
     Value: !Ref 'processedTweetsDynamoDBTable'
     Description: DynamoDB table of tweet metrics to support Web App

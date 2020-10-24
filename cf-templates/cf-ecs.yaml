@@ -131,7 +131,7 @@ Resources:
   taskdefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Join ['', [!Ref 'AWS::StackName', -twitter_scraper]]
+      Family: !Join ['-', [!Ref 'AWS::StackName', twitter_scraper]]
       ContainerDefinitions:
       - Name: twitter
         Cpu: '512'
