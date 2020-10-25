@@ -25,6 +25,7 @@ Parameters:
   HashKeyElementName:
     Description: HashType PrimaryKey Name
     Type: String
+    Default: 'id'
     AllowedPattern: '[a-zA-Z0-9]*'
     MinLength: '1'
     MaxLength: '2048'
@@ -60,13 +61,16 @@ Resources:
     Type: AWS::DynamoDB::Table
     Condition: IsOneTimeInstalls
     Properties:
-      TableName: CICDraw_tweets
+      TableName: raw_tweets
       AttributeDefinitions:
       - AttributeName: !Ref 'HashKeyElementName'
         AttributeType: N
       KeySchema:
       - AttributeName: !Ref 'HashKeyElementName'
         KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: time_tl
+        Enabled: true
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref 'ReadCapacityUnits'
         WriteCapacityUnits: !Ref 'WriteCapacityUnits'
@@ -75,13 +79,16 @@ Resources:
     Type: AWS::DynamoDB::Table
     Condition: IsOneTimeInstalls
     Properties:
-      TableName: CICDtweet_metrics
+      TableName: tweet_metrics
       AttributeDefinitions:
       - AttributeName: !Ref 'HashKeyElementName'
         AttributeType: S
       KeySchema:
       - AttributeName: !Ref 'HashKeyElementName'
         KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: time_tl
+        Enabled: true
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref 'ReadCapacityUnits'
         WriteCapacityUnits: !Ref 'WriteCapacityUnits'
