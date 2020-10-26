@@ -73,8 +73,7 @@ Resources:
             - VPC
             - Outputs.PrivateAZs
         OneTimeInstalls: !Ref OneTimeInstalls
-        HashKeyElementName: 'rawTweetsDynamoDBTable'
-        HashKeyElementType: 'S'
+        HashKeyElementName: 'id'
       TimeoutInMinutes: '10'
 
   ECS:

@@ -48,8 +48,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.PrivateAZs
-        HashKeyElementName: rawTweetsDynamoDBTable
-        HashKeyElementType: S
+        HashKeyElementName: id
         OneTimeInstalls:
           Ref: OneTimeInstalls
         SubnetId:
@@ -60,7 +59,7 @@ Resources:
           Fn::GetAtt:
           - VPC
           - Outputs.VpcId
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/f1179076da2885b7affe0f8b8a012db4.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/f7092b4d5ac544e8df365b0fa0f1ebac.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
   ECS:
