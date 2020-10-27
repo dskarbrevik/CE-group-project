@@ -52,16 +52,15 @@ class TwitterStreamListener(tweepy.StreamListener):
             return False
             
     def extract_tweet_data_for_dynamodb(self, tweet):
-#         parsed_tweet = {}
-#         parsed_tweet['id'] = tweet['id']
-#         parsed_tweet['text'] = tweet['text']
-#         parsed_tweet['time_tl'] = tweet['time_tl']
-#         if tweet.get('user',None).get('location',None):
-#             parsed_tweet['location'] = tweet['user']['location']
-#         else:
-#             parsed_tweet['location']='NONE'
-#         return parsed_tweet
-        return(tweet)
+        parsed_tweet = {}
+        parsed_tweet['id'] = tweet['id']
+        parsed_tweet['text'] = tweet['text']
+        parsed_tweet['time_tl'] = tweet['time_tl']
+        if tweet.get('user',None).get('location',None):
+            parsed_tweet['location'] = tweet['user']['location']
+        else:
+            parsed_tweet['location']='NONE'
+        return parsed_tweet
 
     def on_status(self, status):
         try:
