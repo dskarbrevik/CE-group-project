@@ -5,7 +5,7 @@
 #   Create a VPC with:
 #       1 Public Subnets
 #       1 Private Subnets
-#   An Internet Gateway (with routes to it for Public Subnets)
+#   An Internet Gateway (with routes to it for Public SubnEIPets)
 #   A NAT Gateway for outbound access (with routes from Private Subnets set to use it)
 #
 Resources:
@@ -15,7 +15,7 @@ Resources:
       CidrBlock: 10.0.0.0/16
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName} - VPC"
+          Value: !Sub "${AWS::StackName}-VPC"
 
 
   PublicSubnet1:
