@@ -15,7 +15,7 @@ Resources:
       CidrBlock: 10.0.0.0/16
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName}-VPC (with update)"
+          Value: !Sub "${AWS::StackName}-VPC  (with update from GitHub)"
 
 
   PublicSubnet1:

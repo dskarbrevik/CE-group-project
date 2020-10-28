@@ -103,6 +103,6 @@ Resources:
     Type: AWS::CloudFormation::Stack
   VPC:
     Properties:
-      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/86c15f04a0aad7e6486ede1e1a0fcde6.template
+      TemplateURL: https://s3.amazonaws.com/team1-cicd-pipeline-staging/bfb85555cbb5cd291fd3316632813061.template
       TimeoutInMinutes: '10'
     Type: AWS::CloudFormation::Stack
