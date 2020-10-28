@@ -182,35 +182,26 @@ Outputs:
 
   VPCDefaultSecurityGroup:
     Value: !Sub ${StackVPC.DefaultSecurityGroup}
-
   VpcId:
     Value: !Sub ${PublicSubnet1.VpcId}
-
   PublicSubnetId:
     Value: !Ref PublicSubnet1
-
   PublicAZs:
     Value: !GetAtt
       - PublicSubnet1
       - "AvailabilityZone"
-
   PrivateSubnetId:
     Value: !Ref PrivateSubnet1
-
   PrivateAZs:
     Value: !GetAtt
       - PrivateSubnet1
       - "AvailabilityZone"
-
   PrivateSecurityGroup:
     Value: !Ref PrivateSecurityGroup
-
   PublicSecurityGroup:
     Value: !Ref PublicSecurityGroup
-
   IGW:
     Value: !Ref InternetGateway
-
   StackName:
     Description: 'Stack name.'
     Value: !Sub '${AWS::StackName}'
