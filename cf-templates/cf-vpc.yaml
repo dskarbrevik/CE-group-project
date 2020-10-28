@@ -15,7 +15,7 @@ Resources:
       CidrBlock: 10.0.0.0/16
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName}-VPC"
+          Value: !Sub "${AWS::StackName}-VPC (with update)"
 
 
   PublicSubnet1:
@@ -181,7 +181,7 @@ Resources:
 Outputs:
 
   VPCDefaultSecurityGroup:
-    Value: !Sub ${StackVPC.DefaultSecurityGroup}
+    Value: !Sub ${StackVPC.DefaultSecurityGroup}-
 
   VpcId:
     Value: !Sub ${PublicSubnet1.VpcId}
