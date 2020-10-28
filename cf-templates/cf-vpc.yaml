@@ -15,7 +15,7 @@ Resources:
       CidrBlock: 10.0.0.0/16
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName}-VPC  (with update from GitHub)"
+          Value: !Sub "${AWS::StackName}-VPC "
 
 
   PublicSubnet1:
@@ -31,7 +31,7 @@ Resources:
         - Key: Name
           Value: !Sub "${AWS::StackName} - Public Subnet"
         - Key: Network
-          Value: !Sub "${AWS::StackName} - Public in AZ1"
+          Value: !Sub "${AWS::StackName} - Public in AvailabilityZones"
 
   PrivateSubnet1:
     Type: 'AWS::EC2::Subnet'
