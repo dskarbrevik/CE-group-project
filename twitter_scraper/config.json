@@ -1,6 +1,6 @@
 {
     "twitter_terms":["TRUMP","BIDEN"],
-    "max_tweets_per_second":20,
+    "max_tweets_per_second":50,
     "dynamo_table_name":"raw_tweets",
     "dynamo_region":"us-east-1",
     "tweet_ttl":7200,
